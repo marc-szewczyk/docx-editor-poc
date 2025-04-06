@@ -1,0 +1,4 @@
+node_modules
+/server/output
+/server/uploads
+package-lock.json

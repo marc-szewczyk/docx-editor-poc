@@ -1,10 +1,11 @@
-version: '3'
-
 services:
   client:
     build: ./client
     ports:
       - "5173:5173"
+    volumes:
+      - ./client:/app
+      - /app/node_modules
     depends_on:
       - server
 
@@ -12,3 +13,8 @@ services:
     build: ./server
     ports:
       - "5000:5000"
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+      - ./server/uploads:/app/uploads
+      - ./server/output:/app/output
