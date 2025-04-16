@@ -4,7 +4,6 @@ const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
 const cors = require('cors');
-const HTMLtoDOCX = require('html-to-docx');
 
 const app = express();
 const upload = multer({ dest: 'uploads/' });
