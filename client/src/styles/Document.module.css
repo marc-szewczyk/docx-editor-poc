@@ -1,12 +1,18 @@
+.documentContainerWrapper {
+  position: relative;
+  margin: 2rem auto;
+  width: 8.5in;
+}
+
 .documentContainer {
-  margin-top: 2rem;
+  margin: 2rem auto;
   padding: 1in;
   width: 8.5in;
   min-height: 11in;
   background-color: white;
   border: 1px solid #ccc;
   box-shadow: 0 0 5px rgba(0,0,0,0.1);
-  margin: 2rem auto;
+  position: relative;
 }
 
 .editorToolbar {
@@ -20,8 +26,235 @@
   display: flex;
   gap: 5px;
   z-index: 10;
+  margin-bottom: 0;
+}
+
+.editingContainer {
+  position: relative;
+  /* Remove any top padding that might be pushing content down */
+  padding-top: 0;
+  margin-top: 0;
 }
 
 .editableParagraph {
   cursor: text;
+  outline: 2px solid #0d6efd;;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.editorButton {
+  width: 30px;
+  height: 30px;
+  padding: 2px;
+  margin: 0;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.editorButton:hover {
+  background-color: #f0f0f0;
+  border-color: #999;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transform: translateY(-1px);
+}
+
+.editorButton:active {
+  background-color: #e8e8e8;
+  box-shadow: 0 0 2px rgba(0,0,0,0.1) inset;
+  transform: translateY(0);
+}
+
+.editorSelect {
+  height: 30px;
+  padding: 2px 5px;
+  margin: 0;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  background-color: white;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.editorSelect:hover {
+  border-color: #999;
+}
+
+.editorSelect:focus {
+  border-color: #0d6efd;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(13,110,253,0.25);
+}
+
+.editorColorPicker {
+  width: 30px;
+  height: 30px;
+  padding: 2px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  background-color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.editorColorPicker:hover {
+  border-color: #999;
+  transform: scale(1.05);
+}
+
+/* Add a subtle active state styling for toolbar buttons */
+.editorButtonActive {
+  background-color: #e9ecef;
+  box-shadow: inset 0 0 3px rgba(0,0,0,0.1);
+}
+
+.editorButtonGroup {
+  display: flex;
+  margin-right: 4px;
+}
+
+.editorButtonContainer {
+  position: relative;
+  width: 30px;
+  height: 30px;
+}
+
+.hiddenColorPicker {
+  opacity: 0;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  z-index: 2;
+}
+
+/* Add these styles for disabled buttons */
+.uploadButton:disabled,
+.saveButton:disabled {
+  background-color: #e9ecef;
+  color: #6c757d;
+  border-color: #dee2e6;
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.uploadButton:disabled:hover,
+.saveButton:disabled:hover {
+  background-color: #e9ecef;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Update FileUploader styles */
+.fileUploader {
+  margin-bottom: 20px; /* Add vertical spacing between uploader and buttons */
+  display: flex;
+  flex-direction: column;
+}
+
+.uploadControls {
+  display: flex;
+  align-items: center;
+  gap: 15px; /* Add horizontal spacing between button and filename */
+}
+
+.selectFileButton {
+  padding: 10px 15px;
+  background-color: #007bff;
+  color: white;
+  border: 1px solid #007bff;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.selectFileButton:hover {
+  background-color: #0069d9;
+  border-color: #0062cc;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.selectFileButton:active {
+  background-color: #0062cc;
+  border-color: #005cbf;
+  box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+  transform: translateY(0);
+}
+
+.fileName {
+  font-size: 14px;
+  color: #495057;
+}
+
+/* Add these styles if they don't exist for the other buttons */
+.uploadButton,
+.saveButton {
+  padding: 10px 15px;
+  background-color: #007bff;
+  color: white;
+  border: 1px solid #007bff;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.uploadButton:hover,
+.saveButton:hover {
+  background-color: #0069d9;
+  border-color: #0062cc;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.uploadButton:active,
+.saveButton:active {
+  background-color: #0062cc;
+  border-color: #005cbf;
+  box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+  transform: translateY(0);
+}
+
+/* Update button container spacing */
+.buttonContainer {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px; /* Add space between buttons and status messages */
+}
+
+/* Add back the document styling */
+.document {
+  margin: 2rem auto;
+  padding: 1in;
+  width: 8.5in;
+  min-height: 11in;
+  background-color: white;
+  border: 1px solid #ccc;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  box-sizing: border-box;
+  overflow-wrap: break-word;
+  font-family: 'Calibri', Arial, sans-serif;
+  font-size: 11pt;
+  line-height: 1.5;
+}
+
+/* Wrap it in a container to handle overflow properly */
+.documentWrapper {
+  width: 100%;
+  overflow-x: auto;
+  padding: 1rem 0;
 }

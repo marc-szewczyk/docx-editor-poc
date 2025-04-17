@@ -1,0 +1,64 @@
+.statusMessagesContainer {
+  margin: 10px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.successMessage {
+  padding: 10px;
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: opacity 0.3s ease;
+}
+
+.serverMessageContainer {
+  padding: 10px;
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  min-height: 24px;
+}
+
+.serverMessage {
+  color: #0c5460;
+}
+
+.downloadContainer {
+  min-height: 24px;
+}
+
+.placeholderDownload {
+  padding: 10px;
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.placeholderMessage {
+  color: #6c757d;
+  font-style: italic;
+}
+
+.downloadButton {
+  background-color: #007bff;
+  color: white;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.downloadButton:hover {
+  background-color: #0069d9;
+}

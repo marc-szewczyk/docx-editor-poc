@@ -1,51 +1,49 @@
 import React from 'react';
+import styles from '../styles/StatusMessages.module.css';
 
 const StatusMessages = ({ downloadSuccess, serverMessage, downloadUrl }) => {
   return (
-    <>
-      {downloadSuccess && (
-        <span style={{ 
-          marginLeft: '1rem', 
-          color: 'green', 
-          fontWeight: 'bold'
-        }}>
-          ✓ DOCX file generated successfully!
-        </span>
-      )}
-
-      {serverMessage && (
-        <div style={{ 
-          margin: '1rem 0',
-          padding: '0.5rem',
-          backgroundColor: '#f8f9fa',
-          border: '1px solid #ddd',
-          borderRadius: '4px'
-        }}>
-          <strong>Server message:</strong> {serverMessage}
-        </div>
-      )}
-
-      {downloadUrl && (
-        <div style={{ marginTop: '1rem' }}>
-          <a 
-            href={downloadUrl} 
-            download="Edited.docx"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              display: 'inline-block',
-              padding: '0.5rem 1rem',
-              backgroundColor: '#0d6efd',
-              color: 'white',
-              textDecoration: 'none',
-              borderRadius: '4px'
-            }}
-          >
-            Download DOCX File
-          </a>
-        </div>
-      )}
-    </>
+    <div className={styles.statusMessagesContainer}>
+      {/* Server message area - always visible */}
+      <div className={styles.serverMessageContainer}>
+        {serverMessage ? (
+          <span className={styles.serverMessage}>{serverMessage}</span>
+        ) : (
+          <span className={styles.placeholderMessage}>Ready for upload & conversion</span>
+        )}
+      </div>
+      
+      {/* Download area - always visible but changes state */}
+      <div className={styles.downloadContainer}>
+        {downloadSuccess && downloadUrl ? (
+          <div className={styles.successMessage}>
+            <span>Document successfully generated!</span>
+            <a 
+              href={downloadUrl} 
+              download
+              className={styles.downloadButton}
+            >
+              Download DOCX
+            </a>
+          </div>
+        ) : (
+          <div className={styles.placeholderDownload}>
+            <span className={styles.placeholderMessage}>
+              {downloadUrl ? 'Download ready' : 'No document ready for download'}
+            </span>
+            {downloadUrl && (
+              <a 
+                href={downloadUrl} 
+                download
+                className={styles.downloadButton}
+              >
+                Download DOCX
+              </a>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
 
