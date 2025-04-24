@@ -6,7 +6,7 @@
 
 📂 Folder structure:
 docx-editor-poc/
-├── client/          # React frontend (Quill + Vite)
+├── client/          # React frontend
 ├── server/          # Node.js backend using LibreOffice CLI
 ├── docker-compose.yml
 └── README.txt

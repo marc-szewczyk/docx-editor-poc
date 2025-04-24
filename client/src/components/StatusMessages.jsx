@@ -1,9 +1,22 @@
 import React from 'react';
 import styles from '../styles/StatusMessages.module.css';
 
-const StatusMessages = ({ downloadSuccess, serverMessage, downloadUrl }) => {
+const StatusMessages = ({ downloadSuccess, serverMessage, downloadUrl, htmlLink }) => {
   return (
     <div className={styles.statusMessagesContainer}>
+      {htmlLink && (
+        <div style={{ marginTop: '20px' }}>
+          <a 
+            href={htmlLink} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            style={{ textDecoration: 'none', color: '#0078d4', fontWeight: 'bold' }}
+          >
+            View full generated page
+          </a>
+        </div>
+      )}
+
       {/* Server message area - always visible */}
       <div className={styles.serverMessageContainer}>
         {serverMessage ? (

@@ -18,9 +18,14 @@ app.post('/api/upload', upload.single('docx'), (req, res) => {
 
   exec(`soffice --headless --convert-to html --outdir output ${filePath}`, (err) => {
     if (err) return res.status(500).send('Conversion failed.');
+    
+    const htmlFilePath = `/output/${req.file.filename}.html`;
 
     const htmlContent = fs.readFileSync(outputPath, 'utf8');
-    res.json({ html: htmlContent });
+    res.json({ 
+      html: htmlContent,
+      htmlLink: htmlFilePath,
+    });
   });
 });
 
@@ -39,7 +44,7 @@ app.post('/api/save', (req, res) => {
     fs.mkdirSync(outputDir, { recursive: true });
   }
 
-  // Process the HTML to clean up font specifications
+  // // Process the HTML to clean up font specifications
   // This converts "Font Name, fallback1, fallback2" to just "Font Name"
   let processedHtml = rawHtml;
   
@@ -84,27 +89,40 @@ app.post('/api/save', (req, res) => {
 
   // Make sure we have a complete HTML document with minimal styles
   // Using a simpler HTML structure that LibreOffice can process more reliably
+//   const completeHtml = `<!DOCTYPE html>
+// <html>
+// <head>
+// <meta charset="UTF-8">
+// <title>Edited Document</title>
+// <style>
+// body { font-family: Arial; margin: 1in; }
+// p { margin: 0.5em 0; }
+// </style>
+// </head>
+// <body>
+// ${processedHtml}
+// </body>
+// </html>`;
+  const headContent = processedHtml.match(/<meta[^>]*>|<title[^>]*>.*?<\/title>|<style[^>]*>.*?<\/style>/gi)?.join('\n') || '';
+  const bodyContent = processedHtml.replace(/<meta[^>]*>|<title[^>]*>.*?<\/title>|<style[^>]*>.*?<\/style>/gi, '').trim();
+
   const completeHtml = `<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Edited Document</title>
-<style>
-body { font-family: Arial; margin: 1in; }
-p { margin: 0.5em 0; }
-</style>
-</head>
-<body>
-${processedHtml}
-</body>
-</html>`;
+  <html>
+  <head>
+  <meta charset="UTF-8">
+  ${headContent}
+  </head>
+  <body>
+  ${bodyContent}
+  </body>
+  </html>`;
 
   // Write the HTML file first
   fs.writeFileSync(htmlFilePath, completeHtml);
   
-  // Also save the raw and processed HTML for debugging
+  // Also save the raw HTML for debugging
   fs.writeFileSync(path.join(outputDir, `${timestamp}_raw.html`), rawHtml);
-  fs.writeFileSync(path.join(outputDir, `${timestamp}_processed.html`), processedHtml);
+//  fs.writeFileSync(path.join(outputDir, `${timestamp}_processed.html`), processedHtml);
   
   console.log(`HTML file saved at: ${htmlFilePath}`);
 

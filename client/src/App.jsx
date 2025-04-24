@@ -1,5 +1,4 @@
 import React, { useRef, useReducer, useEffect, useState } from 'react';
-import DOMPurify from 'dompurify';
 import FileUploader from './components/FileUploader';
 import StatusMessages from './components/StatusMessages';
 import styles from './styles/Document.module.css';
@@ -17,7 +16,6 @@ const initialState = {
 function reducer(state, action) {
   switch (action.type) {
     case 'SET_FILE':
-      console.log('Setting file:', action.payload); // Add this for debugging
       return { ...state, file: action.payload };
     case 'SET_HTML':
       return { ...state, html: action.payload };
@@ -27,6 +25,8 @@ function reducer(state, action) {
       return { ...state, downloadSuccess: action.payload };
     case 'SET_DOWNLOAD_URL':
       return { ...state, downloadUrl: action.payload };
+    case 'SET_HTML_LINK':
+      return { ...state, htmlLink: action.payload };
     case 'SET_SERVER_MESSAGE':
       return { ...state, serverMessage: action.payload };
     default:
@@ -34,21 +34,13 @@ function reducer(state, action) {
   }
 }
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+
 const App = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { file, html, saving, downloadSuccess, downloadUrl, serverMessage } = state;
+  const { file, html, saving, downloadSuccess, downloadUrl, htmlLink, serverMessage } = state;
   const docRef = useRef(null);
   const activeEditableRef = useRef(null); // Track the currently active editable element
-
-  useEffect(() => {
-    // Configure DOMPurify to allow styles and specific CSS properties
-    DOMPurify.setConfig({
-      ADD_TAGS: ['style', 'font'],
-      ADD_ATTR: ['style', 'class', 'face', 'size', 'color'],
-      FORBID_TAGS: ['script'],
-      FORBID_ATTR: ['onerror', 'onload']
-    });
-  }, []);
 
   const handleUpload = async () => {
     try {
@@ -68,28 +60,8 @@ const App = () => {
 
       const result = await res.json();
       
-      // Process HTML before setting it to fix nested font issues
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = result.html;
-      
-      // Fix nested fonts
-      tempDiv.querySelectorAll('font[face] > font').forEach(nestedFont => {
-        const parentFont = nestedFont.parentElement;
-        if (parentFont.tagName === 'FONT' && parentFont.hasAttribute('face')) {
-          const fontFamily = parentFont.getAttribute('face');
-          // Apply parent's font-face to child's style
-          if (nestedFont.hasAttribute('style')) {
-            nestedFont.setAttribute(
-              'style', 
-              `${nestedFont.getAttribute('style')}; font-family: ${fontFamily};`
-            );
-          } else {
-            nestedFont.setAttribute('style', `font-family: ${fontFamily};`);
-          }
-        }
-      });
-      
-      dispatch({ type: 'SET_HTML', payload: tempDiv.innerHTML });
+      dispatch({ type: 'SET_HTML', payload: result.html });
+      dispatch({ type: 'SET_HTML_LINK', payload: `${API_BASE_URL}${result.htmlLink}` });
       dispatch({ type: 'SET_SERVER_MESSAGE', payload: 'Document successfully loaded' }); // Set success message instead of clearing
     } catch (error) {
       console.error('Upload error:', error);
@@ -99,14 +71,14 @@ const App = () => {
 
   const handleSave = async () => {
     try {
-      const cleanedHtml = docRef.current.innerHTML;
-
+      const htmlToSave = docRef.current.innerHTML;
+ 
       dispatch({ type: 'SET_SAVING', payload: true });
 
       const res = await fetch('/api/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ html: cleanedHtml })
+        body: JSON.stringify({ html: htmlToSave })
       });
 
       if (!res.ok) {
@@ -119,7 +91,6 @@ const App = () => {
         dispatch({ type: 'SET_SERVER_MESSAGE', payload: result.message });
 
         if (result.downloadUrl) {
-          const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
           dispatch({
             type: 'SET_DOWNLOAD_URL',
             payload: `${API_BASE_URL}${result.downloadUrl}`
@@ -127,6 +98,7 @@ const App = () => {
         }
 
         dispatch({ type: 'SET_DOWNLOAD_SUCCESS', payload: true });
+
         // Only remove the success highlight after timeout, keep the URL
         setTimeout(() =>
           dispatch({ type: 'SET_DOWNLOAD_SUCCESS', payload: false }),
@@ -449,25 +421,14 @@ const App = () => {
   const createEditableParagraph = (paragraph) => {
     // Skip if already editing something
     if (activeEditableRef.current) return;
-    
+
     console.log('Making paragraph editable');
+
+    const editableP = paragraph.cloneNode(true);
     
-    // Get paragraph properties
-    const content = paragraph.innerHTML;
-    const classNames = paragraph.className || '';
-    const styles = paragraph.getAttribute('style') || '';
-    
-    // Create editable paragraph
-    const editableP = document.createElement('p');
-    editableP.innerHTML = content;
-    editableP.className = `${classNames} ${styles.editableParagraph}`;
     editableP.contentEditable = true;
-    
-    if (styles) {
-      editableP.setAttribute('style', styles);
-    }
     editableP.style.cursor = 'text';
-    editableP.style.outline = '2px solid #0d6efd'; // Explicitly set blue outline
+    editableP.style.outline = '2px solid #0d6efd';
     
     // Create container
     const editingContainer = document.createElement('div');
@@ -497,21 +458,17 @@ const App = () => {
     // Handle clicks outside to save changes
     const handleOutsideClick = (e) => {
       if (!editingContainer.contains(e.target)) {
-        // Save changes to a new paragraph
-        const newP = document.createElement('p');
-        newP.innerHTML = editableP.innerHTML;
-        newP.className = classNames;
         
-        if (styles) {
-          newP.setAttribute('style', styles);
-        }
-        newP.style.cursor = 'pointer';
-        
+        const readOnlyP = editableP.cloneNode(true);
+        readOnlyP.contentEditable = false;
+        readOnlyP.style.outline = ''; // Remove outline
+        readOnlyP.style.cursor = 'pointer'; // Reset cursor
+
         // Add click handler that makes this paragraph editable again
-        newP.addEventListener('click', () => createEditableParagraph(newP));
+        readOnlyP.addEventListener('click', () => createEditableParagraph(readOnlyP));
         
         // Replace editing container with paragraph
-        editingContainer.replaceWith(newP);
+        editingContainer.replaceWith(readOnlyP);
         activeEditableRef.current = null;
         
         // Remove document click listener
@@ -540,7 +497,6 @@ const App = () => {
       });
     };
     
-    // Set up handlers after a small delay to ensure DOM is fully loaded
     setTimeout(setupParagraphHandlers, 0);
     
     // Cleanup function
@@ -565,7 +521,6 @@ const App = () => {
       
       <FileUploader onFileSelect={(selectedFile) => dispatch({ type: 'SET_FILE', payload: selectedFile })} />
       
-      {/* Simplify button container to avoid duplicates */}
       <div className={styles.buttonContainer}>
         <button 
           className={styles.uploadButton} 
@@ -588,13 +543,14 @@ const App = () => {
         downloadSuccess={downloadSuccess} 
         serverMessage={serverMessage} 
         downloadUrl={downloadUrl} 
+        htmlLink={htmlLink}
       />
       
       <div className={styles.documentWrapper}>
         <div 
           ref={docRef}
           className={styles.document}
-          dangerouslySetInnerHTML={html ? {__html: DOMPurify.sanitize(html)} : {__html: ''}}
+          dangerouslySetInnerHTML={html ? {__html: html} : {__html: ''}}
         />
       </div>
     </div>
